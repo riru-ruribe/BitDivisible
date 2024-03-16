@@ -57,6 +57,10 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
         {
             if (member is not IFieldSymbol field) continue;
 
+            var memberType = field.Type.ToString();
+
+            var argSb = new StringBuilder();
+            var implSb = new StringBuilder();
             var lastBit = 0;
             foreach (var atr in member.GetAttributes())
             {
@@ -69,9 +73,16 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                     if (sb.Length > 0) sb.AppendLine();
                     if (type == "bool")
                     {
+                        bit = 1;
                         sb.Append(lastBit > 0
                             ? $"    public {type} {fname} => (({member.Name} >> {lastBit}) & 0b1) == 1;"
                             : $"    public {type} {fname} => ({member.Name} & 0b1) == 1;"
+                        );
+
+                        if (implSb.Length > 0) implSb.Append(" |\n            ");
+                        implSb.Append(lastBit > 0
+                            ? $"({memberType})({ToFirstLower(fname)} ? 1 : 0) << {lastBit}"
+                            : $"({memberType})({ToFirstLower(fname)} ? 1 : 0)"
                         );
                     }
                     else
@@ -82,9 +93,28 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                         );
                         for (int i = 0; i < bit; i++) sb.Append("1");
                         sb.Append(");");
+
+                        if (implSb.Length > 0) implSb.Append(" |\n            ");
+                        implSb.Append(lastBit > 0
+                            ? $"({memberType}){ToFirstLower(fname)} << {lastBit}"
+                            : $"({memberType}){ToFirstLower(fname)}"
+                        );
                     }
                     lastBit += bit;
+
+                    if (argSb.Length > 0) argSb.Append(", ");
+                    argSb.Append($"{type} {ToFirstLower(fname)}");
                 }
+            }
+            if (argSb.Length > 0)
+            {
+                sb.Append($$"""
+
+    public void Set{{ToFirstUpper(member.Name)}}({{argSb}})
+    {
+        this.{{member.Name}} = {{implSb}};
+    }
+""");
             }
         }
 
@@ -127,5 +157,14 @@ namespace {{Ns}}
     }
 }
 """;
+    }
+
+    static string ToFirstLower(string s)
+    {
+        return char.ToLower(s[0]) + s.Substring(1);
+    }
+    static string ToFirstUpper(string s)
+    {
+        return char.ToUpper(s[0]) + s.Substring(1);
     }
 }

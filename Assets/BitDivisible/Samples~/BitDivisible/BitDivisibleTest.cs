@@ -23,6 +23,9 @@ namespace BitDivisible.Samples
                 data.i = i;
                 Debug.Log($"A:{data.A}, B:{data.B}");
             }
+
+            data.SetI(1, true);
+            Debug.LogWarning(data.i);
         }
     }
 }

@@ -34,5 +34,11 @@ partial class Data
     public int A => (int)(i & 0b111);
     public bool B => ((i >> 3) & 0b1) == 1;
     public int C => (int)((i >> 4) & 0b11);
+    public SetI(int a, bool b, int c)
+    {
+        this.i = (ulong)a |
+            (ulong)(b ? 1 : 0) << 3 |
+            (ulong)c << 4;
+    }
 }
 ```

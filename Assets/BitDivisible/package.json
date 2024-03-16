@@ -1,0 +1,23 @@
+{
+  "name": "riru.ruribe.bitdivisible",
+  "displayName": "BitDivisible",
+  "version": "1.0.0",
+  "unity": "2022.3",
+  "unityRelease": "12f1",
+  "description": "automatically implement bit shift properties.",
+  "author": {
+    "name": "riru ruribe",
+    "url": "https://github.com/riru-ruribe"
+  },
+  "license": "MIT",
+  "documentationUrl": "https://github.com/riru-ruribe/BitDivisible",
+  "keywords": [],
+  "dependencies": {},
+  "samples": [
+    {
+      "displayName": "Sample",
+      "description": "",
+      "path": "Samples~/BitDivisible"
+    }
+  ]
+}

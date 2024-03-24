@@ -57,6 +57,7 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
         {
             if (member is not IFieldSymbol field) continue;
 
+            var isStatic = field.IsStatic;
             var memberType = field.Type.ToString();
 
             var argSb = new StringBuilder();
@@ -74,10 +75,20 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                     if (type == "bool")
                     {
                         bit = 1;
-                        sb.Append(lastBit > 0
-                            ? $"    public {type} {fname} => (({member.Name} >> {lastBit}) & 0b1) == 1;"
-                            : $"    public {type} {fname} => ({member.Name} & 0b1) == 1;"
-                        );
+                        if (isStatic)
+                        {
+                            sb.Append(lastBit > 0
+                                ? $"    public static {type} {fname} => (({member.Name} >> {lastBit}) & 0b1) == 1;"
+                                : $"    public static {type} {fname} => ({member.Name} & 0b1) == 1;"
+                            );
+                        }
+                        else
+                        {
+                            sb.Append(lastBit > 0
+                                ? $"    public {type} {fname} => (({member.Name} >> {lastBit}) & 0b1) == 1;"
+                                : $"    public {type} {fname} => ({member.Name} & 0b1) == 1;"
+                            );
+                        }
 
                         if (implSb.Length > 0) implSb.Append(" |\n            ");
                         implSb.Append(lastBit > 0
@@ -87,10 +98,20 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        sb.Append(lastBit > 0
-                            ? $"    public {type} {fname} => ({type})(({member.Name} >> {lastBit}) & 0b"
-                            : $"    public {type} {fname} => ({type})({member.Name} & 0b"
-                        );
+                        if (isStatic)
+                        {
+                            sb.Append(lastBit > 0
+                                ? $"    public static {type} {fname} => ({type})(({member.Name} >> {lastBit}) & 0b"
+                                : $"    public static {type} {fname} => ({type})({member.Name} & 0b"
+                            );
+                        }
+                        else
+                        {
+                            sb.Append(lastBit > 0
+                                ? $"    public {type} {fname} => ({type})(({member.Name} >> {lastBit}) & 0b"
+                                : $"    public {type} {fname} => ({type})({member.Name} & 0b"
+                            );
+                        }
                         for (int i = 0; i < bit; i++) sb.Append("1");
                         sb.Append(");");
 
@@ -108,13 +129,26 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
             }
             if (argSb.Length > 0)
             {
-                sb.Append($$"""
+                if (isStatic)
+                {
+                    sb.Append($$"""
+
+    public static void Set{{ToFirstUpper(member.Name)}}({{argSb}})
+    {
+        {{className}}.{{member.Name}} = {{implSb}};
+    }
+""");
+                }
+                else
+                {
+                    sb.Append($$"""
 
     public void Set{{ToFirstUpper(member.Name)}}({{argSb}})
     {
         this.{{member.Name}} = {{implSb}};
     }
 """);
+                }
             }
         }
 

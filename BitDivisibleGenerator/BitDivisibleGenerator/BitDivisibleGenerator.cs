@@ -135,7 +135,7 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
 
     public static void Set{{ToFirstUpper(member.Name)}}({{argSb}})
     {
-        {{className}}.{{member.Name}} = {{implSb}};
+        {{className}}.{{member.Name}} = {{memberType}}({{implSb}});
     }
 """);
                 }
@@ -145,7 +145,7 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
 
     public void Set{{ToFirstUpper(member.Name)}}({{argSb}})
     {
-        this.{{member.Name}} = {{implSb}};
+        this.{{member.Name}} = {{memberType}}({{implSb}});
     }
 """);
                 }

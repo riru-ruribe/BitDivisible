@@ -83,7 +83,7 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ({{(lastBit > 0 ? $"({member.Name} >> {lastBit})" : member.Name)}} & 0b1) == 1;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => {{member.Name}} = ({{member.Name}} ^ ({{member.Name}} & 0b1{{shift0}})) | (({{memberType}})(value ? 1 : 0) << {{lastBit}});
+        set => {{member.Name}} = ({{memberType}})(({{member.Name}} ^ ({{member.Name}} & 0b1{{shift0}})) | (({{memberType}})(value ? 1 : 0) << {{lastBit}}));
     }
 """);
                         if (implSb.Length > 0) implSb.Append(" |\n            ");
@@ -102,7 +102,7 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ({{type}})({{(lastBit > 0 ? $"({member.Name} >> {lastBit})" : member.Name)}} & 0b{{shift1}});
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => {{member.Name}} = ({{member.Name}} ^ ({{member.Name}} & 0b{{shift1}}{{shift0}})) | (({{memberType}})value << {{lastBit}});
+        set => {{member.Name}} = ({{memberType}})(({{member.Name}} ^ ({{member.Name}} & 0b{{shift1}}{{shift0}})) | (({{memberType}})value << {{lastBit}}));
     }
 """);
                         if (implSb.Length > 0) implSb.Append(" |\n            ");

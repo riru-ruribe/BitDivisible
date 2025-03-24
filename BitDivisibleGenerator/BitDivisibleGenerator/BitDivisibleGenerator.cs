@@ -75,12 +75,15 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                     if (sb.Length > 0) sb.Append('\n');
                     if (type == "bool")
                     {
+                        var shift0 = string.Join(string.Empty, Enumerable.Range(0, lastBit).Select(x => "0"));
                         bit = 1;
                         sb.Append($$"""
     public{{(isStatic ? " static" : "")}} bool {{fname}}
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ({{(lastBit > 0 ? $"({member.Name} >> {lastBit})" : member.Name)}} & 0b1) == 1;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => {{member.Name}} = ({{member.Name}} ^ ({{member.Name}} & 0b1{{shift0}})) | (({{memberType}})(value ? 1 : 0) << {{lastBit}});
     }
 """);
                         if (implSb.Length > 0) implSb.Append(" |\n            ");
@@ -91,12 +94,15 @@ public sealed class BitDivisibleGenerator : IIncrementalGenerator
                     }
                     else
                     {
-                        var shift = Enumerable.Range(0, bit).Select(x => "1");
+                        var shift0 = string.Join(string.Empty, Enumerable.Range(0, lastBit).Select(x => "0"));
+                        var shift1 = string.Join(string.Empty, Enumerable.Range(0, bit).Select(x => "1"));
                         sb.Append($$"""
     public{{(isStatic ? " static" : "")}} {{type}} {{fname}}
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => ({{type}})({{(lastBit > 0 ? $"({member.Name} >> {lastBit})" : member.Name)}} & 0b{{string.Join("", shift)}});
+        get => ({{type}})({{(lastBit > 0 ? $"({member.Name} >> {lastBit})" : member.Name)}} & 0b{{shift1}});
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        set => {{member.Name}} = ({{member.Name}} ^ ({{member.Name}} & 0b{{shift1}}{{shift0}})) | (({{memberType}})value << {{lastBit}});
     }
 """);
                         if (implSb.Length > 0) implSb.Append(" |\n            ");
